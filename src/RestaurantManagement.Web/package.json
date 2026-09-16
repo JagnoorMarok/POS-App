@@ -10,7 +10,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "start": "node server/index.js",
-    "tunnel": "bin\\cloudflared.exe tunnel --url http://localhost:5173"
+    "tunnel": "bin\\cloudflared.exe tunnel run --token eyJhIjoiMjc3NGM2OTE1YjJiY2M0MDA2ZDkzYjFmZmYwMTY4ZTMiLCJ0IjoiODJjMmM1ZWMtM2JlMS00MThmLTlhNzctMGE2M2RhYTU2MzljIiwicyI6IlpqRTRPRFZsWXpRdE9EVmtPQzAwT1dJMkxUa3pOVEl0T0RJMVpHUXdNRGM0TVdaayJ9"
   },
   "dependencies": {
     "cors": "^2.8.5",
