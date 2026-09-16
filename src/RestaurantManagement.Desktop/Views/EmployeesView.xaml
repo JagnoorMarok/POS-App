@@ -1,0 +1,487 @@
+<UserControl x:Class="RestaurantManagement.Desktop.Views.EmployeesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:viewmodels="clr-namespace:RestaurantManagement.Desktop.ViewModels"
+             xmlns:enums="clr-namespace:RestaurantManagement.Domain.Enums;assembly=RestaurantManagement.Domain"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1000">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <Style x:Key="ActionBtn" TargetType="Button">
+            <Setter Property="Background" Value="#F1F5F9"/>
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#E2E8F0"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#94A3B8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PrimaryBtn" TargetType="Button">
+            <Setter Property="Background" Value="#4F46E5"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#4338CA"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- Main Content -->
+        <Grid>
+            <Grid.RowDefinitions>
+                <!-- Top Toolbar & Search -->
+                <RowDefinition Height="Auto"/>
+                <!-- Notification Banner -->
+                <RowDefinition Height="Auto"/>
+                <!-- Employee Grid -->
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Top Toolbar -->
+            <Border Grid.Row="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <!-- Search Box -->
+                        <ColumnDefinition Width="280"/>
+                        <!-- Role Filter -->
+                        <ColumnDefinition Width="180"/>
+                        <ColumnDefinition Width="*"/>
+                        <!-- Add Button -->
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Search Input -->
+                    <Grid Grid.Column="0" Margin="0,0,12,0">
+                        <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 Padding="10,8" FontSize="13" Background="#F8FAFC" BorderBrush="#CBD5E1"
+                                 VerticalContentAlignment="Center">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="TextBox">
+                                                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="6">
+                                                    <ScrollViewer x:Name="PART_ContentHost" Margin="4,0"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                        <TextBlock Text="🔍 Search employees..." FontSize="12" Foreground="#94A3B8" IsHitTestVisible="False" VerticalAlignment="Center" Margin="12,0,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SearchText}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SearchText}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+
+                    <!-- Role Filter Dropdown -->
+                    <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableRoles}" SelectedItem="{Binding SelectedRoleFilter}"
+                              Margin="0,0,12,0" Padding="8,6" FontSize="13" VerticalContentAlignment="Center"/>
+
+                    <!-- Refresh & Add Buttons -->
+                    <StackPanel Grid.Column="3" Orientation="Horizontal">
+                        <Button Style="{StaticResource ActionBtn}" Content="🔄 Refresh" Command="{Binding LoadEmployeesCommand}" Margin="0,0,8,0" Padding="12,8"/>
+                        <Button Style="{StaticResource PrimaryBtn}" Content="➕ Add Employee" Command="{Binding OpenAddDialogCommand}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Status Message Banner -->
+            <Border Grid.Row="1" CornerRadius="8" Padding="12,10" Margin="0,0,0,16"
+                    Visibility="{Binding HasStatusMessage, Converter={StaticResource BoolToVis}}">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="#DCFCE7"/>
+                        <Setter Property="BorderBrush" Value="#86EFAC"/>
+                        <Setter Property="BorderThickness" Value="1"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsStatusError}" Value="True">
+                                <Setter Property="Background" Value="#FEE2E2"/>
+                                <Setter Property="BorderBrush" Value="#FCA5A5"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock Text="{Binding StatusMessage}" FontSize="13" FontWeight="Medium">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="#166534"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStatusError}" Value="True">
+                                    <Setter Property="Foreground" Value="#991B1B"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Border>
+
+            <!-- Employee List / DataGrid -->
+            <Border Grid.Row="2" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Padding="0">
+                <DataGrid ItemsSource="{Binding FilteredEmployees}"
+                          SelectedItem="{Binding SelectedEmployee}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="#F1F5F9"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          RowHeight="54"
+                          HeadersVisibility="Column">
+                    <DataGrid.Resources>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#F8FAFC"/>
+                            <Setter Property="Foreground" Value="#475569"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="FontSize" Value="12"/>
+                            <Setter Property="Padding" Value="14,10"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                        </Style>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Background" Value="#FFFFFF"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#F8FAFC"/>
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#EEF2FF"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.Resources>
+
+                    <DataGrid.Columns>
+                        <!-- Employee Info -->
+                        <DataGridTemplateColumn Header="EMPLOYEE" Width="2*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0">
+                                        <Border Background="#EEF2FF" CornerRadius="18" Width="36" Height="36" Margin="0,0,10,0">
+                                            <TextBlock Text="👤" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="13" Foreground="#0F172A"/>
+                                            <TextBlock Text="{Binding Username, StringFormat='@{0}'}" FontSize="11" Foreground="#64748B"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Role Badge -->
+                        <DataGridTemplateColumn Header="ROLE" Width="140">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border HorizontalAlignment="Left" VerticalAlignment="Center" CornerRadius="12" Padding="10,4" Margin="12,0">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#E2E8F0"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Role}" Value="{x:Static enums:EmployeeRole.Administrator}">
+                                                        <Setter Property="Background" Value="#EDE9FE"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Role}" Value="{x:Static enums:EmployeeRole.Manager}">
+                                                        <Setter Property="Background" Value="#E0E7FF"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Role}" Value="{x:Static enums:EmployeeRole.Cashier}">
+                                                        <Setter Property="Background" Value="#DCFCE7"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Role}" Value="{x:Static enums:EmployeeRole.KitchenStaff}">
+                                                        <Setter Property="Background" Value="#FEF3C7"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding Role}" FontWeight="SemiBold" FontSize="11">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#334155"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Role}" Value="{x:Static enums:EmployeeRole.Administrator}">
+                                                            <Setter Property="Foreground" Value="#6D28D9"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Role}" Value="{x:Static enums:EmployeeRole.Manager}">
+                                                            <Setter Property="Foreground" Value="#3730A3"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Role}" Value="{x:Static enums:EmployeeRole.Cashier}">
+                                                            <Setter Property="Foreground" Value="#166534"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Role}" Value="{x:Static enums:EmployeeRole.KitchenStaff}">
+                                                            <Setter Property="Foreground" Value="#92400E"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Status Pill -->
+                        <DataGridTemplateColumn Header="STATUS" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border HorizontalAlignment="Left" VerticalAlignment="Center" CornerRadius="10" Padding="8,3" Margin="12,0">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#DCFCE7"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                        <Setter Property="Background" Value="#F1F5F9"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock FontSize="11" FontWeight="SemiBold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="Active"/>
+                                                    <Setter Property="Foreground" Value="#15803D"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                            <Setter Property="Text" Value="Inactive"/>
+                                                            <Setter Property="Foreground" Value="#64748B"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Last Login -->
+                        <DataGridTextColumn Header="LAST LOGIN" Binding="{Binding LastLoginAt, StringFormat='yyyy-MM-dd HH:mm'}" Width="150"/>
+
+                        <!-- Actions -->
+                        <DataGridTemplateColumn Header="ACTIONS" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0">
+                                        <Button Style="{StaticResource ActionBtn}" Content="✏️ Edit"
+                                                Command="{Binding DataContext.OpenEditDialogCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"/>
+                                        <Button Style="{StaticResource ActionBtn}" Content="🔑 Reset Pass"
+                                                Command="{Binding DataContext.OpenResetPasswordDialogCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"/>
+                                        <Button Command="{Binding DataContext.ToggleActiveStatusCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+                                                    <Setter Property="Content" Value="⛔ Deactivate"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                            <Setter Property="Content" Value="✅ Activate"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                        <Button Style="{StaticResource ActionBtn}" Content="🗑️" ToolTip="Delete Employee Account"
+                                                Background="#FEE2E2" Foreground="#DC2626"
+                                                Command="{Binding DataContext.DeleteEmployeeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        </Grid>
+
+        <!-- ================= MODAL: ADD EMPLOYEE ================= -->
+        <Border Background="#80000000" Visibility="{Binding IsAddDialogOpen, Converter={StaticResource BoolToVis}}" Panel.ZIndex="100">
+            <Border Background="#FFFFFF" Width="440" CornerRadius="12" Padding="24" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel>
+                    <TextBlock Text="➕ Add New Employee" FontSize="18" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,16"/>
+
+                    <!-- Error Alert -->
+                    <Border Background="#FEE2E2" BorderBrush="#FCA5A5" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,12">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DialogErrorMessage}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding DialogErrorMessage}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding DialogErrorMessage}" Foreground="#991B1B" FontSize="12" TextWrapping="Wrap"/>
+                    </Border>
+
+                    <TextBlock Text="Username" FontWeight="SemiBold" FontSize="12" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding NewUsername, UpdateSourceTrigger=PropertyChanged}" Padding="8,6" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Display Name" FontWeight="SemiBold" FontSize="12" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding NewDisplayName, UpdateSourceTrigger=PropertyChanged}" Padding="8,6" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Password" FontWeight="SemiBold" FontSize="12" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged}" Padding="8,6" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Role" FontWeight="SemiBold" FontSize="12" Foreground="#475569" Margin="0,0,0,4"/>
+                    <ComboBox ItemsSource="{Binding AvailableRoles}" SelectedItem="{Binding NewRole}" Padding="8,6" Margin="0,0,0,16"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Style="{StaticResource ActionBtn}" Content="Cancel" Command="{Binding CloseDialogCommand}" Margin="0,0,8,0" Padding="16,8"/>
+                        <Button Style="{StaticResource PrimaryBtn}" Content="Create Employee" Command="{Binding SaveNewEmployeeCommand}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- ================= MODAL: EDIT EMPLOYEE ================= -->
+        <Border Background="#80000000" Visibility="{Binding IsEditDialogOpen, Converter={StaticResource BoolToVis}}" Panel.ZIndex="100">
+            <Border Background="#FFFFFF" Width="460" CornerRadius="12" Padding="24" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel>
+                    <TextBlock Text="✏️ Edit Employee Account" FontSize="18" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,16"/>
+
+                    <Border Background="#FEE2E2" BorderBrush="#FCA5A5" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,12">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DialogErrorMessage}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding DialogErrorMessage}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding DialogErrorMessage}" Foreground="#991B1B" FontSize="12" TextWrapping="Wrap"/>
+                    </Border>
+
+                    <TextBlock Text="Username (Cannot be changed)" FontWeight="SemiBold" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding EditUsername}" IsReadOnly="True" Background="#F1F5F9" Padding="8,6" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Display Name" FontWeight="SemiBold" FontSize="12" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding EditDisplayName, UpdateSourceTrigger=PropertyChanged}" Padding="8,6" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Role" FontWeight="SemiBold" FontSize="12" Foreground="#475569" Margin="0,0,0,4"/>
+                    <ComboBox ItemsSource="{Binding AvailableRoles}" SelectedItem="{Binding EditRole}" Padding="8,6" Margin="0,0,0,12"/>
+
+                    <CheckBox IsChecked="{Binding EditIsActive}" Content="Account is active and permitted to login" Margin="0,0,0,16"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0" Content="🗑️ Delete Account" Command="{Binding DeleteEmployeeCommand}"
+                                Background="#FEE2E2" Foreground="#DC2626" Padding="12,8" FontWeight="SemiBold"
+                                BorderThickness="0" Cursor="Hand">
+                            <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style></Button.Resources>
+                        </Button>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Style="{StaticResource ActionBtn}" Content="Cancel" Command="{Binding CloseDialogCommand}" Margin="0,0,8,0" Padding="16,8"/>
+                            <Button Style="{StaticResource PrimaryBtn}" Content="Save Changes" Command="{Binding SaveEditEmployeeCommand}"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- ================= MODAL: RESET PASSWORD ================= -->
+        <Border Background="#80000000" Visibility="{Binding IsResetPasswordDialogOpen, Converter={StaticResource BoolToVis}}" Panel.ZIndex="100">
+            <Border Background="#FFFFFF" Width="440" CornerRadius="12" Padding="24" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel>
+                    <TextBlock Text="🔑 Reset Employee Password" FontSize="18" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,16"/>
+
+                    <Border Background="#FEE2E2" BorderBrush="#FCA5A5" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,12">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DialogErrorMessage}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding DialogErrorMessage}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding DialogErrorMessage}" Foreground="#991B1B" FontSize="12" TextWrapping="Wrap"/>
+                    </Border>
+
+                    <TextBlock Text="Employee" FontWeight="SemiBold" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding ResetUsername, StringFormat='Account: @{0}'}" IsReadOnly="True" Background="#F1F5F9" Padding="8,6" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="New Password" FontWeight="SemiBold" FontSize="12" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding ResetPassword, UpdateSourceTrigger=PropertyChanged}" Padding="8,6" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Confirm New Password" FontWeight="SemiBold" FontSize="12" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding ResetConfirmPassword, UpdateSourceTrigger=PropertyChanged}" Padding="8,6" Margin="0,0,0,16"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Style="{StaticResource ActionBtn}" Content="Cancel" Command="{Binding CloseDialogCommand}" Margin="0,0,8,0" Padding="16,8"/>
+                        <Button Style="{StaticResource PrimaryBtn}" Content="Update Password" Command="{Binding SaveResetPasswordCommand}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+    </Grid>
+</UserControl>

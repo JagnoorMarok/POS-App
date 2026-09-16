@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurant Menu — Digital Menu & Ordering</title>
+  <meta name="description" content="Explore our authentic menu with fresh ingredients, real-time availability, and direct POS synchronization.">
+
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <div class="brand-icon">🍴</div>
+        <div class="brand-text">
+          <h1 id="restaurant-name-header">Restaurant Menu</h1>
+          <p id="restaurant-tagline-header">POS-Connected Live Menu</p>
+        </div>
+      </div>
+
+      <div class="header-status">
+        <div class="db-pill" title="Connected to SQLite Database (%LOCALAPPDATA%/RestaurantManagement/Data/restaurant.db)">
+          <span class="db-dot"></span>
+          <span>Live SQLite Sync</span>
+        </div>
+        <button id="btn-add-new-item" class="btn-primary" type="button">
+          <span>＋</span> Add Item
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Body Content -->
+  <main class="main-content">
+    
+    <!-- Hero Banner -->
+    <section class="hero-section">
+      <h1 id="hero-title" class="hero-title">Restaurant Menu</h1>
+      <p id="hero-subtitle" class="hero-subtitle">Freshly prepared gourmet dishes crafted with the finest ingredients.</p>
+      <div class="restaurant-meta-bar">
+        <span id="hero-address" class="meta-item">📍 Dine-in & Takeaway</span>
+        <span id="hero-phone" class="meta-item"></span>
+        <span class="meta-item">🕒 Open Daily: 10:00 AM – 11:00 PM</span>
+      </div>
+    </section>
+
+    <!-- Search & Filter Controls -->
+    <div class="controls-card">
+      <div class="controls-row-top">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" class="search-input" placeholder="Search dishes, drinks, ingredients..." autocomplete="off">
+        </div>
+
+        <div class="filter-toggles">
+          <button class="filter-btn active" data-filter="all" type="button">All Items</button>
+          <button class="filter-btn" data-filter="veg" type="button">🌱 Vegetarian</button>
+          <button class="filter-btn" data-filter="nonveg" type="button">🍗 Non-Veg</button>
+        </div>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div id="categories-bar" class="categories-bar">
+        <!-- Dynamically populated category chips -->
+      </div>
+    </div>
+
+    <!-- Menu Display Grid (Grouped by Category) -->
+    <div id="menu-container">
+      <!-- Dynamically populated categories & product cards -->
+    </div>
+
+  </main>
+
+  <!-- Add / Edit Menu Item Modal -->
+  <div id="item-modal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-title" class="modal-title">Edit Menu Item</h3>
+        <button id="modal-close-btn" class="modal-close" type="button" aria-label="Close modal">✕</button>
+      </div>
+
+      <form id="item-form">
+        <div class="modal-body">
+          <input type="hidden" id="form-item-id">
+
+          <div class="form-group">
+            <label for="form-item-name" class="form-label">Item Name *</label>
+            <input type="text" id="form-item-name" class="form-input" required placeholder="e.g. Paneer Butter Masala">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="form-item-category" class="form-label">Category *</label>
+              <select id="form-item-category" class="form-select" required>
+                <!-- Dynamically populated categories -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="form-item-price" class="form-label">Price (₹) *</label>
+              <input type="number" id="form-item-price" class="form-input" step="0.01" min="0" required placeholder="0.00">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="form-item-description" class="form-label">Description</label>
+            <textarea id="form-item-description" class="form-textarea" placeholder="Brief description, flavors, or dietary notes..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="flex-direction: row; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+              <input type="checkbox" id="form-item-available" checked style="width: 18px; height: 18px; accent-color: var(--accent-primary);">
+              <label for="form-item-available" class="form-label" style="margin: 0; cursor: pointer;">Available / In Stock</label>
+            </div>
+
+            <div class="form-group">
+              <label for="form-item-order" class="form-label">Display Order</label>
+              <input type="number" id="form-item-order" class="form-input" value="0">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="modal-delete-btn" class="btn-danger" type="button" style="display: none;">Delete</button>
+          <button id="modal-cancel-btn" class="btn-secondary" type="button">Cancel</button>
+          <button id="modal-save-btn" class="btn-primary" type="submit">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Page Footer -->
+  <footer class="app-footer">
+    <p>© Restaurant POS & Online Menu Engine • Direct SQLite Database Connection</p>
+  </footer>
+
+  <!-- Application Logic -->
+  <script src="js/app.js"></script>
+</body>
+</html>

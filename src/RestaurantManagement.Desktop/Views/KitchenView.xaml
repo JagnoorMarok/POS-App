@@ -1,0 +1,444 @@
+<UserControl x:Class="RestaurantManagement.Desktop.Views.KitchenView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:enums="clr-namespace:RestaurantManagement.Domain.Enums;assembly=RestaurantManagement.Domain"
+             xmlns:converters="clr-namespace:RestaurantManagement.Desktop.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="1100">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="InvBoolToVis"/>
+        <converters:StringToVisibilityConverter x:Key="StringToVis"/>
+
+        <!-- Color Palette for KDS -->
+        <SolidColorBrush x:Key="KdsBackground" Color="#0F172A"/>
+        <SolidColorBrush x:Key="KdsCardBg" Color="#1E293B"/>
+        <SolidColorBrush x:Key="KdsCardBorder" Color="#334155"/>
+        <SolidColorBrush x:Key="KdsTextPrimary" Color="#F8FAFC"/>
+        <SolidColorBrush x:Key="KdsTextSecondary" Color="#94A3B8"/>
+        <SolidColorBrush x:Key="KdsTextMuted" Color="#64748B"/>
+        <SolidColorBrush x:Key="AccentIndigo" Color="#6366F1"/>
+        <SolidColorBrush x:Key="StatusConfirmedBg" Color="#451A03"/>
+        <SolidColorBrush x:Key="StatusConfirmedFg" Color="#FDBA74"/>
+        <SolidColorBrush x:Key="StatusPreparingBg" Color="#1E1B4B"/>
+        <SolidColorBrush x:Key="StatusPreparingFg" Color="#A5B4FC"/>
+        <SolidColorBrush x:Key="StatusReadyBg" Color="#064E3B"/>
+        <SolidColorBrush x:Key="StatusReadyFg" Color="#6EE7B7"/>
+        <SolidColorBrush x:Key="UrgentBg" Color="#7F1D1D"/>
+        <SolidColorBrush x:Key="UrgentFg" Color="#FCA5A5"/>
+
+        <!-- Filter Tab Button Style -->
+        <Style x:Key="KdsFilterBtnStyle" TargetType="Button">
+            <Setter Property="Background" Value="#1E293B"/>
+            <Setter Property="Foreground" Value="#94A3B8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#334155"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#334155"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Action Button Styles -->
+        <Style x:Key="StartPrepBtnStyle" TargetType="Button">
+            <Setter Property="Background" Value="#4F46E5"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#4338CA"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MarkReadyBtnStyle" TargetType="Button">
+            <Setter Property="Background" Value="#059669"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#047857"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MarkServedBtnStyle" TargetType="Button">
+            <Setter Property="Background" Value="#0284C7"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#0369A1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="#0B0F19">
+        <Grid.RowDefinitions>
+            <!-- Top Controls & Status Bar -->
+            <RowDefinition Height="Auto"/>
+            <!-- Notification Alert Bar -->
+            <RowDefinition Height="Auto"/>
+            <!-- Main Ticket Grid -->
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ================= TOP KDS HEADER & FILTER BAR ================= -->
+        <Border Grid.Row="0" Background="#111827" BorderBrush="#1F2937" BorderThickness="0,0,0,1" Padding="20,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <!-- Left: Title and active queue metrics -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Center: Status filters -->
+                    <ColumnDefinition Width="*"/>
+                    <!-- Right: Refresh & Timers -->
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: KDS Brand & Metrics -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Background="#4F46E5" CornerRadius="8" Width="40" Height="40" Margin="0,0,12,0">
+                        <TextBlock Text="🍳" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="KITCHEN DISPLAY SYSTEM (KDS)" FontWeight="Black" FontSize="18" Foreground="#F8FAFC"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                            <TextBlock Text="{Binding TotalActiveCount, StringFormat='Active Tickets: {0}'}" FontSize="12" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,12,0"/>
+                            <TextBlock Text="•" Foreground="#4B5563" Margin="0,0,12,0"/>
+                            <TextBlock Text="{Binding ConfirmedCount, StringFormat='New: {0}'}" FontSize="12" FontWeight="SemiBold" Foreground="#FDBA74" Margin="0,0,12,0"/>
+                            <TextBlock Text="•" Foreground="#4B5563" Margin="0,0,12,0"/>
+                            <TextBlock Text="{Binding PreparingCount, StringFormat='In Prep: {0}'}" FontSize="12" FontWeight="SemiBold" Foreground="#A5B4FC" Margin="0,0,12,0"/>
+                            <TextBlock Text="•" Foreground="#4B5563" Margin="0,0,12,0"/>
+                            <TextBlock Text="{Binding ReadyCount, StringFormat='Ready: {0}'}" FontSize="12" FontWeight="SemiBold" Foreground="#6EE7B7"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Center: Filter Buttons -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Button Style="{StaticResource KdsFilterBtnStyle}" Content="All Active" Command="{Binding SetFilterCommand}" CommandParameter="All"/>
+                    <Button Style="{StaticResource KdsFilterBtnStyle}" Content="New / Confirmed" Command="{Binding SetFilterCommand}" CommandParameter="Confirmed"/>
+                    <Button Style="{StaticResource KdsFilterBtnStyle}" Content="Preparing" Command="{Binding SetFilterCommand}" CommandParameter="Preparing"/>
+                    <Button Style="{StaticResource KdsFilterBtnStyle}" Content="Ready for Pickup" Command="{Binding SetFilterCommand}" CommandParameter="Ready"/>
+                </StackPanel>
+
+                <!-- Right: Refresh & Timers -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Background="#1F2937" CornerRadius="8" Padding="12,6" Margin="0,0,10,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="Auto-sync: " FontSize="11" Foreground="#9CA3AF"/>
+                            <TextBlock Text="5s" FontWeight="Bold" FontSize="11" Foreground="#34D399" Margin="0,0,8,0"/>
+                            <TextBlock Text="Last: " FontSize="11" Foreground="#9CA3AF"/>
+                            <TextBlock Text="{Binding LastRefreshedText}" FontWeight="Bold" FontSize="11" Foreground="#E5E7EB"/>
+                        </StackPanel>
+                    </Border>
+                    <Button Content="🔄 Refresh" Command="{Binding RefreshOrdersCommand}" Style="{StaticResource KdsFilterBtnStyle}" Margin="0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ================= NOTIFICATION / ALERT BAR ================= -->
+        <StackPanel Grid.Row="1">
+            <Border Background="#1E3A8A" Padding="16,10" Margin="20,12,20,0" CornerRadius="8"
+                    Visibility="{Binding StatusMessage, Converter={StaticResource StringToVis}}">
+                <TextBlock Text="{Binding StatusMessage}" Foreground="#93C5FD" FontWeight="SemiBold" FontSize="13"/>
+            </Border>
+            <Border Background="#7F1D1D" Padding="16,10" Margin="20,12,20,0" CornerRadius="8"
+                    Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVis}}">
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="#FCA5A5" FontWeight="SemiBold" FontSize="13"/>
+            </Border>
+        </StackPanel>
+
+        <!-- ================= MAIN TICKET DISPLAY AREA ================= -->
+        <Grid Grid.Row="2" Margin="20">
+            <!-- Case 1: Empty Queue State -->
+            <Border Background="#111827" BorderBrush="#1F2937" BorderThickness="1" CornerRadius="12" Padding="40"
+                    Visibility="{Binding HasNoOrders, Converter={StaticResource BoolToVis}}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="✨" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                    <TextBlock Text="Kitchen Queue is Clear" FontSize="20" FontWeight="Bold" Foreground="#F8FAFC" HorizontalAlignment="Center"/>
+                    <TextBlock Text="All incoming POS orders will appear here in real-time." FontSize="13" Foreground="#9CA3AF" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Case 2: Active Kitchen Tickets Scrollable Grid -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                          Visibility="{Binding HasOrders, Converter={StaticResource BoolToVis}}">
+                <ItemsControl ItemsSource="{Binding FilteredOrders}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <!-- Kitchen Order Card -->
+                            <Border Width="330" Margin="0,0,16,16" Background="#1E293B" BorderBrush="#334155" BorderThickness="1" CornerRadius="10">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsUrgent}" Value="True">
+                                                <Setter Property="BorderBrush" Value="#EF4444"/>
+                                                <Setter Property="BorderThickness" Value="2"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <!-- Card Header -->
+                                        <RowDefinition Height="Auto"/>
+                                        <!-- Order Age & Status Row -->
+                                        <RowDefinition Height="Auto"/>
+                                        <!-- Items List -->
+                                        <RowDefinition Height="*"/>
+                                        <!-- Order Notes (Optional) -->
+                                        <RowDefinition Height="Auto"/>
+                                        <!-- Action Buttons Footer -->
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- 1. Card Top Header -->
+                                    <Border Grid.Row="0" Background="#0F172A" CornerRadius="10,10,0,0" Padding="14,10" BorderBrush="#334155" BorderThickness="0,0,0,1">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding OrderNumber}" FontWeight="Black" FontSize="16" Foreground="#F8FAFC"/>
+                                                <TextBlock Text="{Binding OrderTypeBadge}" FontSize="12" FontWeight="Bold" Foreground="#38BDF8" Margin="0,2,0,0"/>
+                                            </StackPanel>
+
+                                            <!-- Age Pill -->
+                                            <Border Grid.Column="1" VerticalAlignment="Center" CornerRadius="6" Padding="8,4" Background="#1E293B">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsUrgent}" Value="True">
+                                                                <Setter Property="Background" Value="#7F1D1D"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock Text="{Binding AgeText}" FontSize="11" FontWeight="Bold" Foreground="#E2E8F0">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsUrgent}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#FCA5A5"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- 2. Status Row -->
+                                    <Border Grid.Row="1" Padding="14,6" Background="#182234">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding StatusText}" FontSize="11" FontWeight="Bold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="#94A3B8"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}" Value="{x:Static enums:OrderStatus.Confirmed}">
+                                                                <Setter Property="Foreground" Value="#FDBA74"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="{x:Static enums:OrderStatus.Preparing}">
+                                                                <Setter Property="Foreground" Value="#818CF8"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="{x:Static enums:OrderStatus.Ready}">
+                                                                <Setter Property="Foreground" Value="#34D399"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <TextBlock Grid.Column="1" Text="{Binding CreatedAt, StringFormat='{}{0:hh:mm tt}'}" FontSize="11" Foreground="#64748B"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- 3. Line Items List -->
+                                    <ItemsControl Grid.Row="2" ItemsSource="{Binding Items}" Margin="14,10">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Margin="0,0,0,8" Padding="0,0,0,6" BorderBrush="#334155" BorderThickness="0,0,0,1">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="36"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <!-- Quantity Badge -->
+                                                        <Border Grid.Column="0" Background="#334155" CornerRadius="6" Height="26" Width="30" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                                            <TextBlock Text="{Binding Quantity, StringFormat='{}{0}×'}" FontWeight="Black" FontSize="13" Foreground="#F8FAFC" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <!-- Item Name & Notes -->
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding ProductName}" FontSize="13" FontWeight="Bold" Foreground="#F1F5F9" TextWrapping="Wrap"/>
+                                                            <!-- Special instructions callout -->
+                                                            <Border Margin="0,4,0,0" Padding="8,3" Background="#3B2609" CornerRadius="4" BorderBrush="#78350F" BorderThickness="1"
+                                                                    Visibility="{Binding HasNotes, Converter={StaticResource BoolToVis}}">
+                                                                <TextBlock FontSize="11" Foreground="#FDE68A" TextWrapping="Wrap">
+                                                                    <Run Text="💬 Note: " FontWeight="Bold"/>
+                                                                    <Run Text="{Binding Notes, Mode=OneWay}"/>
+                                                                </TextBlock>
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <!-- 4. General Order Notes (if any) -->
+                                    <Border Grid.Row="3" Margin="14,0,14,10" Padding="10,6" Background="#241D3B" CornerRadius="6" BorderBrush="#4338CA" BorderThickness="1"
+                                            Visibility="{Binding HasOrderNotes, Converter={StaticResource BoolToVis}}">
+                                        <TextBlock FontSize="11" Foreground="#C7D2FE" TextWrapping="Wrap">
+                                            <Run Text="📝 Order Note: " FontWeight="Bold"/>
+                                            <Run Text="{Binding Notes, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </Border>
+
+                                    <!-- 5. Action Buttons Footer -->
+                                    <Border Grid.Row="4" Background="#111827" CornerRadius="0,0,10,10" Padding="12" BorderBrush="#334155" BorderThickness="0,1,0,0">
+                                        <Grid>
+                                            <!-- State: Confirmed -> Show [Start Prep] & [Mark Ready] -->
+                                            <Grid Visibility="{Binding CanStartPreparation, Converter={StaticResource BoolToVis}}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="8"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Button Grid.Column="0" Content="👨‍🍳 Start Prep" Style="{StaticResource StartPrepBtnStyle}"
+                                                        Command="{Binding DataContext.StartPreparationCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"/>
+                                                <Button Grid.Column="2" Content="✅ Mark Ready" Style="{StaticResource MarkReadyBtnStyle}"
+                                                        Command="{Binding DataContext.MarkReadyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"/>
+                                            </Grid>
+
+                                            <!-- State: Preparing -> Show [Mark Ready] & [Mark Served] -->
+                                            <Grid>
+                                                <Grid.Style>
+                                                    <Style TargetType="Grid">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}" Value="{x:Static enums:OrderStatus.Preparing}">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Grid.Style>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="8"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Button Grid.Column="0" Content="✅ Mark Ready" Style="{StaticResource MarkReadyBtnStyle}"
+                                                        Command="{Binding DataContext.MarkReadyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"/>
+                                                <Button Grid.Column="2" Content="🍽️ Mark Served" Style="{StaticResource MarkServedBtnStyle}"
+                                                        Command="{Binding DataContext.MarkServedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"/>
+                                            </Grid>
+
+                                            <!-- State: Ready -> Show [Mark Served] -->
+                                            <Grid>
+                                                <Grid.Style>
+                                                    <Style TargetType="Grid">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}" Value="{x:Static enums:OrderStatus.Ready}">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Grid.Style>
+                                                <Button Content="🍽️ Mark Order Served" Style="{StaticResource MarkServedBtnStyle}"
+                                                        Command="{Binding DataContext.MarkServedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"/>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>

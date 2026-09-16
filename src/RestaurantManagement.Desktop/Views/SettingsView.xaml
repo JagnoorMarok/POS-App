@@ -1,0 +1,335 @@
+<UserControl x:Class="RestaurantManagement.Desktop.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:viewmodels="clr-namespace:RestaurantManagement.Desktop.ViewModels"
+             xmlns:converters="clr-namespace:RestaurantManagement.Desktop.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="1100">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="InvBoolToVis"/>
+        <converters:StringToVisibilityConverter x:Key="StringToVis"/>
+
+        <!-- Palette -->
+        <SolidColorBrush x:Key="CardBackground" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#0F172A"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#64748B"/>
+        <SolidColorBrush x:Key="BorderLight" Color="#E2E8F0"/>
+        <SolidColorBrush x:Key="AccentColor" Color="#4F46E5"/>
+
+        <!-- Tab Chip Button Style -->
+        <Style x:Key="TabChipStyle" TargetType="Button">
+            <Setter Property="Background" Value="#F1F5F9"/>
+            <Setter Property="Foreground" Value="#475569"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#E2E8F0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Background="#F8FAFC" Margin="0,0,0,24">
+            <Grid.RowDefinitions>
+                <!-- 0: Header & Navigation Tabs -->
+                <RowDefinition Height="Auto"/>
+                <!-- 1: Message Banners -->
+                <RowDefinition Height="Auto"/>
+                <!-- 2: Tab Content -->
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- ================= ROW 0: HEADER & TABS ================= -->
+            <Border Grid.Row="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="12" Padding="16" Margin="0,0,0,16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Grid.Row="0" Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock Text="⚙️ Restaurant Settings &amp; Profile" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                            <TextBlock Text="Configure restaurant branding, default tax rates, local SQLite storage, and hardware settings." FontSize="13" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <Button DockPanel.Dock="Right" Command="{Binding RefreshAllCommand}" Background="#EEF2FF" Foreground="#4F46E5" BorderThickness="1" BorderBrush="#C7D2FE" Padding="12,6" Cursor="Hand" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                        <TextBlock Text="🔄 Reload" FontWeight="SemiBold"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </DockPanel>
+
+                    <!-- Tab Buttons -->
+                    <WrapPanel Grid.Row="1">
+                        <Button Content="🏢 Restaurant Profile &amp; Tax" Style="{StaticResource TabChipStyle}" Command="{Binding SelectTabCommand}" CommandParameter="Profile" Margin="0,0,8,0"/>
+                        <Button Content="💻 System Diagnostics &amp; SQLite" Style="{StaticResource TabChipStyle}" Command="{Binding SelectTabCommand}" CommandParameter="Diagnostics" Margin="0,0,8,0"/>
+                        <Button Content="⚙️ Operational Preferences" Style="{StaticResource TabChipStyle}" Command="{Binding SelectTabCommand}" CommandParameter="Config"/>
+                    </WrapPanel>
+                </Grid>
+            </Border>
+
+            <!-- ================= ROW 1: MESSAGE BANNERS ================= -->
+            <StackPanel Grid.Row="1" Margin="0,0,0,12">
+                <Border Background="#DCFCE7" BorderBrush="#86EFAC" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,0,6"
+                        Visibility="{Binding SuccessMessage, Converter={StaticResource StringToVis}}">
+                    <TextBlock Text="{Binding SuccessMessage}" Foreground="#166534" FontWeight="SemiBold" FontSize="13"/>
+                </Border>
+                <Border Background="#FEE2E2" BorderBrush="#FCA5A5" BorderThickness="1" CornerRadius="8" Padding="12,8"
+                        Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVis}}">
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="#991B1B" FontWeight="SemiBold" FontSize="13"/>
+                </Border>
+            </StackPanel>
+
+            <!-- ================= ROW 2: TAB CONTENT AREA ================= -->
+            <Grid Grid.Row="2">
+                <!-- TAB 1: RESTAURANT PROFILE & TAX -->
+                <Border Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="12" Padding="20">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedTab}" Value="Profile">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
+                    <StackPanel MaxWidth="680" HorizontalAlignment="Left">
+                        <TextBlock Text="Restaurant Identity &amp; Tax Configuration" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,4"/>
+                        <TextBlock Text="These details will appear on printed customer bills, order invoices, and the POS header." FontSize="13" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,16"/>
+
+                        <!-- Restaurant Name -->
+                        <TextBlock Text="Restaurant Business Name *" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
+                        <TextBox Text="{Binding RestaurantName, UpdateSourceTrigger=PropertyChanged}" Padding="10,8" FontSize="14" Margin="0,0,0,14"/>
+
+                        <!-- Address -->
+                        <TextBlock Text="Physical Address" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
+                        <TextBox Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" Padding="10,8" FontSize="14" Margin="0,0,0,14"/>
+
+                        <!-- Phone Number -->
+                        <TextBlock Text="Contact Phone Number" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
+                        <TextBox Text="{Binding PhoneNumber, UpdateSourceTrigger=PropertyChanged}" Padding="10,8" FontSize="14" Margin="0,0,0,14"/>
+
+                        <!-- Currency Code & Symbol -->
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                <TextBlock Text="Currency Code (e.g. INR, USD)" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding CurrencyCode, UpdateSourceTrigger=PropertyChanged}" Padding="10,8" FontSize="14"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                <TextBlock Text="Currency Symbol (e.g. ₹, $)" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding CurrencySymbol, UpdateSourceTrigger=PropertyChanged}" Padding="10,8" FontSize="14"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- GST / Tax Number & Default Tax Rate -->
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                <TextBlock Text="GSTIN / Tax Identification" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding GstOrTaxNumber, UpdateSourceTrigger=PropertyChanged}" Padding="10,8" FontSize="14"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                <TextBlock Text="Default Tax Rate (%)" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding DefaultTaxRatePercent, UpdateSourceTrigger=PropertyChanged}" Padding="10,8" FontSize="14"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Save Button -->
+                        <Button Content="Save Restaurant Profile" Command="{Binding SaveProfileCommand}"
+                                Background="#4F46E5" Foreground="#FFFFFF" FontWeight="Bold" FontSize="14" Padding="16,10" HorizontalAlignment="Left" Cursor="Hand">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- TAB 2: SYSTEM DIAGNOSTICS & SQLITE -->
+                <Border Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="12" Padding="20">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedTab}" Value="Diagnostics">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
+                    <StackPanel>
+                        <TextBlock Text="SQLite Database &amp; System Health Diagnostics" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,4"/>
+                        <TextBlock Text="Live metrics inspecting database connectivity, local storage size, and record volume." FontSize="13" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,16"/>
+
+                        <!-- Metrics Grid -->
+                        <UniformGrid Columns="3" Margin="0,0,0,16">
+                            <!-- Database Status -->
+                            <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,10,10">
+                                <StackPanel>
+                                    <TextBlock Text="DATABASE STATUS" FontSize="11" FontWeight="Bold" Foreground="#64748B"/>
+                                    <TextBlock Text="Connected (Healthy)" FontSize="18" FontWeight="Bold" Foreground="#16A34A" Margin="0,4,0,0"/>
+                                    <TextBlock Text="SQLite 3 Storage" FontSize="11" Foreground="#94A3B8"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Database Size -->
+                            <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,10,10">
+                                <StackPanel>
+                                    <TextBlock Text="DATABASE FILE SIZE" FontSize="11" FontWeight="Bold" Foreground="#64748B"/>
+                                    <TextBlock Text="{Binding FormattedDatabaseSize}" FontSize="18" FontWeight="Bold" Foreground="#0F172A" Margin="0,4,0,0"/>
+                                    <TextBlock Text="Local disk footprint" FontSize="11" Foreground="#94A3B8"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Orders Count -->
+                            <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                                <StackPanel>
+                                    <TextBlock Text="TOTAL ORDERS" FontSize="11" FontWeight="Bold" Foreground="#64748B"/>
+                                    <TextBlock Text="{Binding TotalOrders}" FontSize="18" FontWeight="Bold" Foreground="#0F172A" Margin="0,4,0,0"/>
+                                    <TextBlock Text="Lifetime transactions" FontSize="11" Foreground="#94A3B8"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Products -->
+                            <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,10,0">
+                                <StackPanel>
+                                    <TextBlock Text="MENU PRODUCTS" FontSize="11" FontWeight="Bold" Foreground="#64748B"/>
+                                    <TextBlock Text="{Binding TotalProducts}" FontSize="18" FontWeight="Bold" Foreground="#0F172A" Margin="0,4,0,0"/>
+                                    <TextBlock Text="{Binding TotalCategories, StringFormat='Across {0} categories'}" FontSize="11" Foreground="#94A3B8"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Employees -->
+                            <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,10,0">
+                                <StackPanel>
+                                    <TextBlock Text="STAFF ACCOUNTS" FontSize="11" FontWeight="Bold" Foreground="#64748B"/>
+                                    <TextBlock Text="{Binding TotalEmployees}" FontSize="18" FontWeight="Bold" Foreground="#0F172A" Margin="0,4,0,0"/>
+                                    <TextBlock Text="With role-based access" FontSize="11" Foreground="#94A3B8"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Tables -->
+                            <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="14">
+                                <StackPanel>
+                                    <TextBlock Text="RESTAURANT TABLES" FontSize="11" FontWeight="Bold" Foreground="#64748B"/>
+                                    <TextBlock Text="{Binding TotalTables}" FontSize="18" FontWeight="Bold" Foreground="#0F172A" Margin="0,4,0,0"/>
+                                    <TextBlock Text="Configured dining tables" FontSize="11" Foreground="#94A3B8"/>
+                                </StackPanel>
+                            </Border>
+                        </UniformGrid>
+
+                        <!-- System Details -->
+                        <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="14">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Application Version:" FontWeight="SemiBold" Foreground="#64748B"/>
+                                    <TextBlock Text="{Binding AppVersion}" FontWeight="Bold" Foreground="#0F172A" Margin="0,2,0,8"/>
+
+                                    <TextBlock Text="Runtime Environment:" FontWeight="SemiBold" Foreground="#64748B"/>
+                                    <TextBlock Text="{Binding EnvironmentName}" FontWeight="Bold" Foreground="#0F172A" Margin="0,2,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="System Architecture:" FontWeight="SemiBold" Foreground="#64748B"/>
+                                    <TextBlock Text="{Binding Architecture}" FontWeight="Bold" Foreground="#0F172A" Margin="0,2,0,8"/>
+
+                                    <TextBlock Text="Server Time (UTC):" FontWeight="SemiBold" Foreground="#64748B"/>
+                                    <TextBlock Text="{Binding ServerTimeUtc}" FontWeight="Bold" Foreground="#0F172A" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- TAB 3: OPERATIONAL CONFIGURATION -->
+                <Border Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="12" Padding="20">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedTab}" Value="Config">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
+                    <StackPanel MaxWidth="680" HorizontalAlignment="Left">
+                        <TextBlock Text="Application Operational Preferences" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,4"/>
+                        <TextBlock Text="Configure local timers, default order modes, and invoice header/footer notes." FontSize="13" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,16"/>
+
+                        <!-- KDS Interval -->
+                        <TextBlock Text="Kitchen Display System (KDS) Auto-Refresh Interval (Seconds)" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
+                        <TextBox Text="{Binding KdsRefreshIntervalSeconds, UpdateSourceTrigger=PropertyChanged}" Padding="10,8" FontSize="14" Margin="0,0,0,14"/>
+
+                        <!-- Default Order Type -->
+                        <TextBlock Text="Default POS Order Type (DineIn / Takeaway / Online)" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
+                        <TextBox Text="{Binding DefaultOrderType, UpdateSourceTrigger=PropertyChanged}" Padding="10,8" FontSize="14" Margin="0,0,0,14"/>
+
+                        <!-- Receipt Header -->
+                        <TextBlock Text="Receipt Header Greeting" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
+                        <TextBox Text="{Binding ReceiptHeaderMessage, UpdateSourceTrigger=PropertyChanged}" Padding="10,8" FontSize="14" Margin="0,0,0,14"/>
+
+                        <!-- Receipt Footer -->
+                        <TextBlock Text="Receipt Footer Note" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
+                        <TextBox Text="{Binding ReceiptFooterMessage, UpdateSourceTrigger=PropertyChanged}" Padding="10,8" FontSize="14" Margin="0,0,0,20"/>
+
+                        <!-- Save Button -->
+                        <Button Content="Save Preferences" Command="{Binding SaveAppConfigCommand}"
+                                Background="#4F46E5" Foreground="#FFFFFF" FontWeight="Bold" FontSize="14" Padding="16,10" HorizontalAlignment="Left" Cursor="Hand">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

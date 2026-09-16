@@ -1,0 +1,847 @@
+<UserControl x:Class="RestaurantManagement.Desktop.Views.OrdersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dto="clr-namespace:RestaurantManagement.Application.Menu.DTOs;assembly=RestaurantManagement.Application"
+             xmlns:orderDto="clr-namespace:RestaurantManagement.Application.Orders.DTOs;assembly=RestaurantManagement.Application"
+             xmlns:viewmodels="clr-namespace:RestaurantManagement.Desktop.ViewModels"
+             xmlns:converters="clr-namespace:RestaurantManagement.Desktop.Converters"
+             xmlns:enums="clr-namespace:RestaurantManagement.Domain.Enums;assembly=RestaurantManagement.Domain"
+             mc:Ignorable="d" 
+             d:DesignHeight="750" d:DesignWidth="1100">
+
+    <UserControl.Resources>
+        <!-- Value Converters -->
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis"/>
+        <converters:StringToVisibilityConverter x:Key="StringToVis"/>
+        <converters:CountToVisibilityConverter x:Key="CountToVis"/>
+        <converters:ZeroCountToVisibilityConverter x:Key="ZeroCountToVis"/>
+
+        <!-- Color Palette -->
+        <SolidColorBrush x:Key="CardBackground" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="SurfaceBackground" Color="#F8FAFC"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#0F172A"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#64748B"/>
+        <SolidColorBrush x:Key="TextMuted" Color="#94A3B8"/>
+        <SolidColorBrush x:Key="BorderLight" Color="#E2E8F0"/>
+        <SolidColorBrush x:Key="AccentColor" Color="#4F46E5"/>
+        <SolidColorBrush x:Key="AccentHover" Color="#4338CA"/>
+        <SolidColorBrush x:Key="AccentLight" Color="#EEF2FF"/>
+        <SolidColorBrush x:Key="DangerColor" Color="#DC2626"/>
+        <SolidColorBrush x:Key="SuccessColor" Color="#16A34A"/>
+        <SolidColorBrush x:Key="WarningColor" Color="#D97706"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- ================================================================= -->
+        <!-- VIEW 1: STEP 1 - ORDER SETUP SCREEN (Order Type -> Table -> Menu)  -->
+        <!-- ================================================================= -->
+        <Grid Visibility="{Binding IsOrderSetupActive, Converter={StaticResource BoolToVis}}">
+            <Grid.ColumnDefinitions>
+                <!-- Left 60%: Setup Form -->
+                <ColumnDefinition Width="3*"/>
+                <!-- Right 40%: Open Orders List -->
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- LEFT: Order Type & Table Selection -->
+            <Border Grid.Column="0" Background="{StaticResource CardBackground}" 
+                    BorderBrush="{StaticResource BorderLight}" BorderThickness="1" 
+                    CornerRadius="12" Margin="0,0,16,0" Padding="24">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel>
+                        <!-- Header -->
+                        <TextBlock Text="Start New Order" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,4"/>
+                        <TextBlock Text="Step 1 of 2: Select service type and dining table before taking order" FontSize="13" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,20"/>
+
+                        <!-- Error Banner (if any) -->
+                        <Border Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" 
+                                CornerRadius="8" Padding="12,8" Margin="0,0,0,16"
+                                Visibility="{Binding HasSetupError, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="{Binding SetupError}" Foreground="{StaticResource DangerColor}" FontWeight="SemiBold" FontSize="13"/>
+                        </Border>
+
+                        <!-- Step 1: Order Type Cards -->
+                        <TextBlock Text="1. SELECT ORDER TYPE" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,10"/>
+                        <UniformGrid Columns="3" Margin="0,0,0,24">
+                            <!-- Dine-In Card -->
+                            <Button Command="{Binding SelectOrderTypeCommand}" CommandParameter="{x:Static enums:OrderType.DineIn}"
+                                    Margin="0,0,8,0" Padding="14" Height="105" Cursor="Hand" BorderThickness="2"
+                                    HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+                                        <Setter Property="BorderBrush" Value="{StaticResource BorderLight}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSetupDineIn}" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource AccentLight}"/>
+                                                <Setter Property="BorderBrush" Value="{StaticResource AccentColor}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="10"/>
+                                    </Style>
+                                </Button.Resources>
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <TextBlock Text="🍽️" FontSize="26" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                                    <TextBlock Text="Dine-In" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Table service" FontSize="11" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Takeaway Card -->
+                            <Button Command="{Binding SelectOrderTypeCommand}" CommandParameter="{x:Static enums:OrderType.Takeaway}"
+                                    Margin="4,0,4,0" Padding="14" Height="105" Cursor="Hand" BorderThickness="2"
+                                    HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+                                        <Setter Property="BorderBrush" Value="{StaticResource BorderLight}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSetupTakeaway}" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource AccentLight}"/>
+                                                <Setter Property="BorderBrush" Value="{StaticResource AccentColor}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="10"/>
+                                    </Style>
+                                </Button.Resources>
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <TextBlock Text="🛍️" FontSize="26" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                                    <TextBlock Text="Takeaway" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Pickup &amp; carry out" FontSize="11" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Delivery Card -->
+                            <Button Command="{Binding SelectOrderTypeCommand}" CommandParameter="{x:Static enums:OrderType.Delivery}"
+                                    Margin="8,0,0,0" Padding="14" Height="105" Cursor="Hand" BorderThickness="2"
+                                    HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+                                        <Setter Property="BorderBrush" Value="{StaticResource BorderLight}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSetupDelivery}" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource AccentLight}"/>
+                                                <Setter Property="BorderBrush" Value="{StaticResource AccentColor}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="10"/>
+                                    </Style>
+                                </Button.Resources>
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <TextBlock Text="🛵" FontSize="26" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                                    <TextBlock Text="Delivery" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Online dispatch" FontSize="11" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </UniformGrid>
+
+                        <!-- Step 2: Table Selection (Visible for Dine-In) -->
+                        <StackPanel Visibility="{Binding IsSetupDineIn, Converter={StaticResource BoolToVis}}" Margin="0,0,0,24">
+                            <Grid Margin="0,0,0,10">
+                                <TextBlock Text="2. CHOOSE DINING TABLE" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock Text="{Binding SetupSelectedTableName, StringFormat='Selected: {0}'}" 
+                                           FontSize="12" FontWeight="Bold" Foreground="{StaticResource AccentColor}" HorizontalAlignment="Right"/>
+                            </Grid>
+
+                            <ItemsControl ItemsSource="{Binding TableItems}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type viewmodels:TableItemViewModel}">
+                                        <Button Command="{Binding DataContext.SelectTableCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Width="110" Height="80" Margin="0,0,10,10" Padding="8" Cursor="Hand" BorderThickness="2"
+                                                HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                                            <Button.Resources>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="CornerRadius" Value="8"/>
+                                                </Style>
+                                            </Button.Resources>
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Background" Value="{StaticResource SurfaceBackground}"/>
+                                                    <Setter Property="BorderBrush" Value="{StaticResource BorderLight}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                            <Setter Property="Background" Value="{StaticResource AccentLight}"/>
+                                                            <Setter Property="BorderBrush" Value="{StaticResource AccentColor}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsOccupied}" Value="True">
+                                                            <Setter Property="Background" Value="#FEF2F2"/>
+                                                            <Setter Property="BorderBrush" Value="#FECACA"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="*"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                <TextBlock Grid.Row="0" Text="{Binding TableNumber, StringFormat='Table {0}'}" 
+                                                           FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                                                <TextBlock Grid.Row="1" Text="{Binding Capacity, StringFormat='{}{0} Seats'}" 
+                                                           FontSize="11" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
+                                                <Border Grid.Row="2" HorizontalAlignment="Left" CornerRadius="4" Padding="4,1">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="#DCFCE7"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsOccupied}" Value="True">
+                                                                    <Setter Property="Background" Value="#FEE2E2"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock Text="{Binding StatusText}" FontSize="9" FontWeight="Bold">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="{StaticResource SuccessColor}"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsOccupied}" Value="True">
+                                                                        <Setter Property="Foreground" Value="{StaticResource DangerColor}"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Border>
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+                        <!-- Step 3: Customer / Order Notes (Optional) -->
+                        <TextBlock Text="3. CUSTOMER / ORDER NOTES (OPTIONAL)" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,8"/>
+                        <TextBox Text="{Binding SetupNotes, UpdateSourceTrigger=PropertyChanged}" 
+                                 Padding="12,10" FontSize="13" Height="50" TextWrapping="Wrap" Margin="0,0,0,24"
+                                 BorderBrush="{StaticResource BorderLight}">
+                            <TextBox.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="8"/>
+                                </Style>
+                            </TextBox.Resources>
+                        </TextBox>
+
+                        <!-- Step 4: Proceed to Menu Action -->
+                        <Button Command="{Binding StartOrderFromSetupCommand}"
+                                Background="{StaticResource AccentColor}" Foreground="White"
+                                Padding="0,14" FontWeight="Bold" FontSize="15" BorderThickness="0" Cursor="Hand">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="8"/>
+                                </Style>
+                            </Button.Resources>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <TextBlock Text="Proceed to Menu ➔" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <!-- RIGHT: Active & Open Orders List -->
+            <Border Grid.Column="1" Background="{StaticResource CardBackground}" 
+                    BorderBrush="{StaticResource BorderLight}" BorderThickness="1" 
+                    CornerRadius="12" Padding="20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="Active Open Orders" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                            <TextBlock Text="Resume an in-progress ticket" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <Grid>
+                            <!-- Empty Open Orders Placeholder -->
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,40"
+                                        Visibility="{Binding HasNoOpenOrders, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="📋" FontSize="36" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                <TextBlock Text="No active open orders" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Start an order using the form on the left" FontSize="12" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                            </StackPanel>
+
+                            <ItemsControl ItemsSource="{Binding OpenOrders}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type orderDto:OrderDto}">
+                                        <Border Background="{StaticResource SurfaceBackground}" BorderBrush="{StaticResource BorderLight}" 
+                                                BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,10">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+
+                                                <!-- Left: Number & Table -->
+                                                <StackPanel Grid.Row="0" Grid.Column="0">
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                        <TextBlock Text="{Binding OrderNumber}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" Margin="0,0,6,0"/>
+                                                        <Border Background="{StaticResource AccentLight}" CornerRadius="4" Padding="6,1">
+                                                            <TextBlock Text="{Binding OrderType}" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentColor}"/>
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <TextBlock Text="{Binding TableNumber, StringFormat='Table {0}', TargetNullValue='No Table'}" 
+                                                               FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                                                    <TextBlock Text="{Binding CreatedAt, StringFormat='Created: {0:HH:mm}'}" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                                </StackPanel>
+
+                                                <!-- Right: Total & Status -->
+                                                <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                                    <TextBlock Text="{Binding TotalAmount, StringFormat='₹{0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Right"/>
+                                                    <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource WarningColor}" HorizontalAlignment="Right"/>
+                                                </StackPanel>
+
+                                                <!-- Action: Resume Order Button -->
+                                                <Button Grid.Row="1" Grid.ColumnSpan="2" Command="{Binding DataContext.SelectOpenOrderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        Content="Resume Order ➔" Margin="0,10,0,0" Padding="0,6"
+                                                        Background="{StaticResource AccentColor}" Foreground="White"
+                                                        FontWeight="Bold" FontSize="12" BorderThickness="0" Cursor="Hand">
+                                                    <Button.Resources>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="CornerRadius" Value="6"/>
+                                                        </Style>
+                                                    </Button.Resources>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+
+
+        <!-- ================================================================= -->
+        <!-- VIEW 2: STEP 2 - POS MENU CATALOG & LIVE ORDER TICKET TERMINAL    -->
+        <!-- ================================================================= -->
+        <Grid Visibility="{Binding IsMenuCatalogActive, Converter={StaticResource BoolToVis}}">
+            <Grid.ColumnDefinitions>
+                <!-- Left: Catalog & Product Grid -->
+                <ColumnDefinition Width="*"/>
+                <!-- Right: Active Order Ticket & Checkout Panel -->
+                <ColumnDefinition Width="400"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ================= LEFT: CATALOG & PRODUCT SELECTION ================= -->
+            <Grid Grid.Column="0" Margin="0,0,16,0">
+                <Grid.RowDefinitions>
+                    <!-- Search & Switch Order Bar -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Category Chips -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Status / Notification Alert -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Products Grid -->
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- 1. Top Bar: Switch/New Order + Search -->
+                <Grid Grid.Row="0" Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Back / Switch Order Button -->
+                    <Button Grid.Column="0" Command="{Binding OpenSetupScreenCommand}"
+                            Background="{StaticResource CardBackground}" Foreground="{StaticResource AccentColor}"
+                            BorderBrush="{StaticResource BorderLight}" BorderThickness="1"
+                            Padding="14,8" FontWeight="SemiBold" FontSize="13" Cursor="Hand" Margin="0,0,12,0">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="8"/>
+                            </Style>
+                        </Button.Resources>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="← New / Switch Order" Margin="0,0,6,0"/>
+                            <Border Background="{StaticResource AccentColor}" CornerRadius="10" Padding="6,1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding OpenOrders.Count}" Foreground="White" FontSize="11" FontWeight="Bold"/>
+                            </Border>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Search Box -->
+                    <Border Grid.Column="1" Background="{StaticResource CardBackground}" 
+                            BorderBrush="{StaticResource BorderLight}" BorderThickness="1" 
+                            CornerRadius="8" Padding="12,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="🔍" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{StaticResource TextSecondary}"/>
+                            <TextBox Grid.Column="1" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
+                                     BorderThickness="0" Background="Transparent" VerticalAlignment="Center"
+                                     FontSize="14" Foreground="{StaticResource TextPrimary}">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Style.Triggers>
+                                            <Trigger Property="Text" Value="">
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <VisualBrush Stretch="None" AlignmentX="Left">
+                                                            <VisualBrush.Visual>
+                                                                <TextBlock Text="Search menu items..." Foreground="#94A3B8" FontSize="14"/>
+                                                            </VisualBrush.Visual>
+                                                        </VisualBrush>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- 2. Category Filter Chips -->
+                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,14">
+                    <ItemsControl ItemsSource="{Binding CategoryItems}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type viewmodels:CategoryItemViewModel}">
+                                <Button Content="{Binding Name}" 
+                                        Command="{Binding DataContext.SelectCategoryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        Margin="0,0,8,0" Padding="16,8" FontSize="13" FontWeight="SemiBold"
+                                        Cursor="Hand" BorderThickness="1">
+                                    <Button.Resources>
+                                        <Style TargetType="Border">
+                                            <Setter Property="CornerRadius" Value="20"/>
+                                        </Style>
+                                    </Button.Resources>
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+                                            <Setter Property="BorderBrush" Value="{StaticResource BorderLight}"/>
+                                            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource AccentColor}"/>
+                                                    <Setter Property="BorderBrush" Value="{StaticResource AccentColor}"/>
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- 3. Error Banner (if any) -->
+                <Border Grid.Row="2" Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" 
+                        CornerRadius="8" Padding="12,8" Margin="0,0,0,10"
+                        Visibility="{Binding HasErrorMessage, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="{StaticResource DangerColor}" FontWeight="SemiBold" FontSize="12"/>
+                </Border>
+
+                <!-- 4. Product Tiles Grid -->
+                <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding FilteredProducts}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type dto:ProductDto}">
+                                <Button Command="{Binding DataContext.AddProductToOrderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        Width="175" Height="140" Margin="0,0,12,12" Padding="0"
+                                        Background="{StaticResource CardBackground}" BorderBrush="{StaticResource BorderLight}"
+                                        BorderThickness="1" Cursor="Hand" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                                    <Button.Resources>
+                                        <Style TargetType="Border">
+                                            <Setter Property="CornerRadius" Value="10"/>
+                                        </Style>
+                                    </Button.Resources>
+                                    <Grid Margin="12">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Category Label -->
+                                        <Border Grid.Row="0" HorizontalAlignment="Left" Background="{StaticResource AccentLight}" 
+                                                CornerRadius="4" Padding="6,2" Margin="0,0,0,4">
+                                            <TextBlock Text="{Binding CategoryName}" FontSize="10" FontWeight="Bold" Foreground="{StaticResource AccentColor}"/>
+                                        </Border>
+
+                                        <!-- Product Name -->
+                                        <TextBlock Grid.Row="1" Text="{Binding Name}" FontSize="14" FontWeight="Bold" 
+                                                   Foreground="{StaticResource TextPrimary}" TextWrapping="Wrap" 
+                                                   VerticalAlignment="Top" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" MaxHeight="40"/>
+
+                                        <!-- Price and Add icon -->
+                                        <Grid Grid.Row="2" VerticalAlignment="Bottom">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Price, StringFormat='₹{0:N2}'}" 
+                                                       FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
+                                            <Border Grid.Column="1" Background="{StaticResource AccentColor}" CornerRadius="6" Width="26" Height="26">
+                                                <TextBlock Text="+" Foreground="White" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </Grid>
+                                    </Grid>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+
+            <!-- ================= RIGHT: ACTIVE ORDER TICKET ================= -->
+            <Border Grid.Column="1" Background="{StaticResource CardBackground}" 
+                    BorderBrush="{StaticResource BorderLight}" BorderThickness="1" 
+                    CornerRadius="12" Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <!-- Order Ticket Header -->
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <!-- Items List -->
+                        <RowDefinition Height="*"/>
+                        <!-- Totals & Summary -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Order Action Buttons -->
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- 1. Ticket Header Top (Order Number & Switch Button) -->
+                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="{Binding ActiveOrderNumber}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                            <TextBlock Text="{Binding ActiveOrderTableName}" FontSize="13" Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Command="{Binding OpenSetupScreenCommand}"
+                                Background="{StaticResource AccentLight}" Foreground="{StaticResource AccentColor}"
+                                Padding="10,6" FontWeight="SemiBold" FontSize="12" BorderThickness="0" Cursor="Hand">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                </Style>
+                            </Button.Resources>
+                            <TextBlock Text="Switch / New"/>
+                        </Button>
+                    </Grid>
+
+                    <!-- 2. Status Pill & Type Badge -->
+                    <Border Grid.Row="1" Background="{StaticResource SurfaceBackground}" CornerRadius="8" Padding="10,6" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="Status: " FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock Text="{Binding ActiveOrderStatus}" FontSize="12" FontWeight="Bold" Foreground="{StaticResource AccentColor}"/>
+                            </StackPanel>
+                            <Border Grid.Column="1" Background="{StaticResource AccentLight}" CornerRadius="4" Padding="6,2">
+                                <TextBlock Text="{Binding ActiveOrderType}" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentColor}"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- 3. Ticket Items Scrollable List -->
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,0,0,12">
+                        <Grid>
+                            <!-- Empty Cart Placeholder -->
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,30"
+                                        Visibility="{Binding HasNoActiveOrderItems, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="🛒" FontSize="42" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                <TextBlock Text="Ticket is empty" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Click menu items on the left to add" FontSize="12" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                            </StackPanel>
+
+                            <!-- Items List -->
+                            <ItemsControl ItemsSource="{Binding ActiveOrderItems}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type orderDto:OrderItemDto}">
+                                        <Border Background="{StaticResource SurfaceBackground}" BorderBrush="{StaticResource BorderLight}" 
+                                                BorderThickness="1" CornerRadius="8" Padding="10" Margin="0,0,0,8">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Product Name & Unit Price -->
+                                                <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding ProductNameSnapshot}" FontSize="13" FontWeight="Bold" 
+                                                               Foreground="{StaticResource TextPrimary}" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding UnitPrice, StringFormat='₹{0:N2} each'}" FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                                                </StackPanel>
+
+                                                <!-- Quantity Stepper -->
+                                                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0">
+                                                    <!-- Decrement Button -->
+                                                    <Button Command="{Binding DataContext.DecrementQuantityCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            Width="26" Height="26" Background="{StaticResource CardBackground}" 
+                                                            BorderBrush="{StaticResource BorderLight}" BorderThickness="1"
+                                                            FontWeight="Bold" FontSize="12" Cursor="Hand">
+                                                        <Button.Resources>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="CornerRadius" Value="4"/>
+                                                            </Style>
+                                                        </Button.Resources>
+                                                        <TextBlock Text="-"/>
+                                                    </Button>
+
+                                                    <TextBlock Text="{Binding Quantity}" FontSize="13" FontWeight="Bold" 
+                                                               VerticalAlignment="Center" Margin="8,0" MinWidth="18" TextAlignment="Center"/>
+
+                                                    <!-- Increment Button -->
+                                                    <Button Command="{Binding DataContext.IncrementQuantityCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            Width="26" Height="26" Background="{StaticResource CardBackground}" 
+                                                            BorderBrush="{StaticResource BorderLight}" BorderThickness="1"
+                                                            FontWeight="Bold" FontSize="12" Cursor="Hand">
+                                                        <Button.Resources>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="CornerRadius" Value="4"/>
+                                                            </Style>
+                                                        </Button.Resources>
+                                                        <TextBlock Text="+"/>
+                                                    </Button>
+                                                </StackPanel>
+
+                                                <!-- Total Price & Delete Button -->
+                                                <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding TotalAmount, StringFormat='₹{0:N2}'}" 
+                                                               FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" 
+                                                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                    <Button Command="{Binding DataContext.RemoveItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            Background="Transparent" BorderThickness="0" Foreground="{StaticResource DangerColor}"
+                                                            FontWeight="Bold" FontSize="14" Cursor="Hand" ToolTip="Remove item" Padding="4">
+                                                        <TextBlock Text="✕"/>
+                                                    </Button>
+                                                </StackPanel>
+
+                                                <!-- Line 2: Special Instructions / Notes -->
+                                                <Grid Grid.Row="1" Grid.ColumnSpan="3" Margin="0,6,0,0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <TextBlock Grid.Column="0" Text="{Binding Notes, TargetNullValue='No special instructions'}" 
+                                                               FontSize="11" FontStyle="Italic" Foreground="{StaticResource TextSecondary}" 
+                                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+
+                                                    <Button Grid.Column="1" Command="{Binding DataContext.OpenItemNotesCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            Background="Transparent" BorderThickness="0" Foreground="{StaticResource AccentColor}"
+                                                            FontSize="11" Cursor="Hand" Padding="2">
+                                                        <TextBlock Text="✏️ Edit Note"/>
+                                                    </Button>
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </ScrollViewer>
+
+                    <!-- 4. Totals Breakdown Card -->
+                    <Border Grid.Row="3" Background="{StaticResource SurfaceBackground}" 
+                            BorderBrush="{StaticResource BorderLight}" BorderThickness="1" 
+                            CornerRadius="8" Padding="12" Margin="0,0,0,12">
+                        <StackPanel>
+                            <!-- Subtotal -->
+                            <Grid Margin="0,0,0,4">
+                                <TextBlock Text="Subtotal" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock Text="{Binding ActiveOrderSubtotal, StringFormat='₹{0:N2}'}" FontSize="12" FontWeight="SemiBold" 
+                                           HorizontalAlignment="Right" Foreground="{StaticResource TextPrimary}"/>
+                            </Grid>
+                            <!-- Discount -->
+                            <Grid Margin="0,0,0,4">
+                                <TextBlock Text="Discount" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock Text="{Binding ActiveOrderDiscount, StringFormat='₹{0:N2}'}" FontSize="12" FontWeight="SemiBold" 
+                                           HorizontalAlignment="Right" Foreground="{StaticResource SuccessColor}"/>
+                            </Grid>
+                            <!-- Tax -->
+                            <Grid Margin="0,0,0,6">
+                                <TextBlock Text="Tax" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock Text="{Binding ActiveOrderTax, StringFormat='₹{0:N2}'}" FontSize="12" FontWeight="SemiBold" 
+                                           HorizontalAlignment="Right" Foreground="{StaticResource TextPrimary}"/>
+                            </Grid>
+                            <Separator Background="{StaticResource BorderLight}" Margin="0,2,0,6"/>
+                            <!-- Grand Total -->
+                            <Grid>
+                                <TextBlock Text="Total Payable" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock Text="{Binding ActiveOrderTotal, StringFormat='₹{0:N2}'}" FontSize="18" FontWeight="Bold" 
+                                           HorizontalAlignment="Right" Foreground="{StaticResource AccentColor}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 5. POS Action Buttons -->
+                    <Grid Grid.Row="4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Primary Action: Confirm Order (Draft -> Confirmed) -->
+                        <Button Grid.Row="0" Grid.Column="0" Command="{Binding ConfirmActiveOrderCommand}"
+                                Background="{StaticResource AccentColor}" Foreground="White"
+                                Margin="0,0,4,6" Padding="0,10" FontWeight="Bold" FontSize="13"
+                                BorderThickness="0" Cursor="Hand">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                </Style>
+                            </Button.Resources>
+                            <TextBlock Text="✓ Confirm Order"/>
+                        </Button>
+
+                        <!-- Complete Order Action -->
+                        <Button Grid.Row="0" Grid.Column="1" Command="{Binding CompleteActiveOrderCommand}"
+                                Background="{StaticResource SuccessColor}" Foreground="White"
+                                Margin="4,0,0,6" Padding="0,10" FontWeight="Bold" FontSize="13"
+                                BorderThickness="0" Cursor="Hand">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                </Style>
+                            </Button.Resources>
+                            <TextBlock Text="★ Complete Order"/>
+                        </Button>
+
+                        <!-- Cancel Order Action -->
+                        <Button Grid.Row="1" Grid.Column="0" Command="{Binding CancelActiveOrderCommand}"
+                                Background="{StaticResource DangerColor}" Foreground="White"
+                                Margin="0,0,4,0" Padding="0,8" FontWeight="SemiBold" FontSize="12"
+                                BorderThickness="0" Cursor="Hand">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                </Style>
+                            </Button.Resources>
+                            <TextBlock Text="Cancel Order"/>
+                        </Button>
+
+                        <!-- Clear Active Ticket Action -->
+                        <Button Grid.Row="1" Grid.Column="1" Command="{Binding ClearActiveOrderCommand}"
+                                Background="Transparent" BorderBrush="{StaticResource BorderLight}" BorderThickness="1"
+                                Foreground="{StaticResource TextSecondary}" Margin="4,0,0,0" Padding="0,8"
+                                FontWeight="SemiBold" FontSize="12" Cursor="Hand">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                </Style>
+                            </Button.Resources>
+                            <TextBlock Text="Clear Ticket"/>
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ================================================================= -->
+        <!-- MODAL: ITEM SPECIAL INSTRUCTIONS / NOTES DIALOG (Z-Index 100)      -->
+        <!-- ================================================================= -->
+        <Grid Panel.ZIndex="100" Background="#7F000000" Visibility="{Binding IsItemNotesModalOpen, Converter={StaticResource BoolToVis}}">
+            <Border Background="{StaticResource CardBackground}" CornerRadius="12" Width="400" 
+                    Padding="24" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    BorderBrush="{StaticResource BorderLight}" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="Special Instructions" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,4"/>
+                    <TextBlock Text="{Binding EditingOrderItem.ProductNameSnapshot}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource AccentColor}" Margin="0,0,0,16"/>
+
+                    <TextBox Text="{Binding EditingItemNotesText, UpdateSourceTrigger=PropertyChanged}" 
+                             Padding="10,8" FontSize="13" Height="80" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,20"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Command="{Binding CloseItemNotesCommand}"
+                                Content="Cancel" Margin="0,0,6,0" Padding="0,10"
+                                Background="Transparent" BorderBrush="{StaticResource BorderLight}" BorderThickness="1"
+                                Foreground="{StaticResource TextSecondary}" FontWeight="SemiBold" Cursor="Hand">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                </Style>
+                            </Button.Resources>
+                        </Button>
+                        <Button Grid.Column="1" Command="{Binding SaveItemNotesCommand}"
+                                Content="Save Note" Margin="6,0,0,0" Padding="0,10"
+                                Background="{StaticResource AccentColor}" Foreground="White"
+                                FontWeight="Bold" BorderThickness="0" Cursor="Hand">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                </Style>
+                            </Button.Resources>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

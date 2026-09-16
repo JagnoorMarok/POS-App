@@ -1,0 +1,45 @@
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio / VS Code / Rider
+.vs/
+.vscode/
+.idea/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.userprefs
+
+## Generated files
+*.log
+*.sqlite
+*.db
+*.db-shm
+*.db-wal
+
+## OS Files
+.DS_Store
+Thumbs.db
+dotnet-install.ps1
+
+## Node.js & Web
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+*.exe
+!src/**/*.exe.config
